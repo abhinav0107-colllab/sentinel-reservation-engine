@@ -56,6 +56,7 @@ management:
         sentinel.reservation.hold: true
 
 server:
+  port: ${SENTINEL_PORT:8081}
   shutdown: graceful
   error:
     include-message: always
