@@ -28,7 +28,7 @@ Concurrency evidence: [`docs/CONCURRENCY_EVIDENCE.md`](docs/CONCURRENCY_EVIDENCE
   `CHECK (reserved <= total)` constraint is the backstop.
 - **Verified with a negative control.** A database-level concurrency check runs the production SQL from
   32 concurrent connections and confirms the invariants. The same checker catches a naive implementation
-  that accepted 371 reservations against 10 rooms per night without ever tripping the CHECK constraint.
+  that accepted 356 reservations against 10 rooms per night without ever tripping the CHECK constraint.
 - **Idempotency keys done properly.** Stored in PostgreSQL in the same transaction as the booking;
   concurrent duplicates are serialized by the unique index; key reuse with a different body → 422.
 - **Transactional outbox + idempotent consumers.** Events commit with state; consumers deduplicate with

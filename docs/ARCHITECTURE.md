@@ -80,7 +80,7 @@ UPDATE" loses updates under concurrency.
 
 **Defence in depth:** `CHECK (reserved >= 0 AND reserved <= total)` makes an oversell impossible to
 commit even if a future code path forgets the lock. Note that the CHECK alone does **not** prevent lost
-updates (the negative control oversold 371 reservations against 10 rooms/night without ever violating it), which is why
+updates (the negative control oversold 356 reservations against 10 rooms/night without ever violating it), which is why
 both are needed.
 
 **Global lock order:** reservation row → inventory rows (by date). Creating a hold touches only inventory

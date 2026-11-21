@@ -33,7 +33,7 @@ SCHEMA = os.path.join(os.path.dirname(__file__), "..", "src", "main", "resources
 
 # ---- statements mirrored from ReservationRepository / InventoryRepository -----------------------
 CLAIM_KEY = """INSERT INTO idempotency_keys (idem_key, operation, request_hash, response_status, response_body)
-               VALUES (%s, 'create_reservation', %s, 0, '{}'::jsonb) ON CONFLICT DO NOTHING"""
+               VALUES (%s, 'create_reservation', %s, 0, '') ON CONFLICT DO NOTHING"""
 LOCK_NIGHTS = """SELECT stay_date, total, reserved, price FROM room_inventory
                  WHERE room_type_id = %s AND stay_date >= %s AND stay_date < %s
                  ORDER BY stay_date FOR UPDATE"""
@@ -43,7 +43,7 @@ INSERT_RES = """INSERT INTO reservations (id, hotel_id, room_type_id, check_in, 
                                           amount, currency, payment_token, status, hold_expires_at)
                 VALUES (%s, %s, %s, %s, %s, %s, 'Load Test', 'load@test.invalid', %s, 'USD', 'tok_ok',
                         'PENDING_PAYMENT', now() + interval '10 minutes')"""
-COMPLETE_KEY = """UPDATE idempotency_keys SET response_status = 201, response_body = %s::jsonb
+COMPLETE_KEY = """UPDATE idempotency_keys SET response_status = 201, response_body = %s
                   WHERE operation = 'create_reservation' AND idem_key = %s"""
 RELEASE = """UPDATE reservations SET status = %s, holds_inventory = FALSE, version = version + 1, updated_at = now()
              WHERE id = %s AND holds_inventory
@@ -64,7 +64,7 @@ def hold(conn, hotel_id, room_type_id, check_in, check_out, rooms, idem_key):
         if cur.rowcount == 0:  # a committed request with this key exists -> replay
             cur.execute("SELECT response_body FROM idempotency_keys WHERE operation='create_reservation' AND idem_key=%s",
                         (idem_key,))
-            return cur.fetchone()[0]["id"], True
+            return json.loads(cur.fetchone()[0])["id"], True
         nights = (check_out - check_in).days
         rows = cur.execute(LOCK_NIGHTS, (room_type_id, check_in, check_out)).fetchall()
         if len(rows) != nights or any(total - reserved < rooms for _, total, reserved, _ in rows):

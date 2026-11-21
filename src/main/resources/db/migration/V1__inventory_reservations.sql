@@ -70,7 +70,7 @@ CREATE TABLE idempotency_keys (
     operation        VARCHAR(50)   NOT NULL,
     request_hash     CHAR(64)      NOT NULL,     -- SHA-256 of the canonical request; detects key reuse with a different body
     response_status  SMALLINT      NOT NULL,
-    response_body    JSONB         NOT NULL,
+    response_body    TEXT          NOT NULL,     -- TEXT, not JSONB: replays must be byte-identical to the original response
     created_at       TIMESTAMPTZ   NOT NULL DEFAULT now(),
     PRIMARY KEY (operation, idem_key)
 );

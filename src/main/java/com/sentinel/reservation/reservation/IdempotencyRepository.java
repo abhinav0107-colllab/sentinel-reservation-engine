@@ -33,14 +33,14 @@ public class IdempotencyRepository {
     public boolean claim(String operation, String key, String requestHash) {
         return jdbc.sql("""
                 INSERT INTO idempotency_keys (idem_key, operation, request_hash, response_status, response_body)
-                VALUES (:key, :op, :hash, 0, '{}'::jsonb) ON CONFLICT DO NOTHING
+                VALUES (:key, :op, :hash, 0, '') ON CONFLICT DO NOTHING
                 """)
                 .param("key", key).param("op", operation).param("hash", requestHash)
                 .update() == 1;
     }
 
     public Optional<Stored> find(String operation, String key) {
-        return jdbc.sql("SELECT request_hash, response_status, response_body::text AS body FROM idempotency_keys "
+        return jdbc.sql("SELECT request_hash, response_status, response_body AS body FROM idempotency_keys "
                         + "WHERE operation = :op AND idem_key = :key")
                 .param("op", operation).param("key", key)
                 .query((rs, i) -> new Stored(rs.getString("request_hash"), rs.getInt("response_status"), rs.getString("body")))
@@ -48,7 +48,7 @@ public class IdempotencyRepository {
     }
 
     public void complete(String operation, String key, int status, String bodyJson) {
-        jdbc.sql("UPDATE idempotency_keys SET response_status = :st, response_body = CAST(:body AS jsonb) "
+        jdbc.sql("UPDATE idempotency_keys SET response_status = :st, response_body = :body "
                         + "WHERE operation = :op AND idem_key = :key")
                 .param("st", status).param("body", bodyJson).param("op", operation).param("key", key)
                 .update();

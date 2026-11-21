@@ -19,10 +19,10 @@ host, run on 2026-11-21. Timings are not meaningful as benchmarks and are not qu
 
 | Scenario | Setup | Outcomes | I1 | I2 | I4 |
 |---|---|---|---|---|---|
-| Contention with cancellations | 32 threads × 50 ops, 10 rooms × 5 nights, 1–3-night stays, 1–2 rooms, 20 % cancels | 148 holds, 1,142 sold out, 109 releases, 201 release no-ops | ✅ | ✅ | ✅ 0 deadlocks |
+| Contention with cancellations | 32 threads × 50 ops, 10 rooms × 5 nights, 1–3-night stays, 1–2 rooms, 20 % cancels | 146 holds, 1,129 sold out, 112 releases, 213 release no-ops | ✅ | ✅ | ✅ 0 deadlocks |
 | Contention without cancellations | same, 0 % cancels | 29 holds, 1,571 sold out; every night ends at exactly 10/10 | ✅ | ✅ | ✅ 0 deadlocks |
 | Idempotent retries | 25 concurrent requests, same key | 1 reservation created, 24 replayed, 1 distinct id returned | — | — | — |
-| **Negative control**: naive read-then-write (no row locks) | same as row 2 | **371 holds accepted** for 50 room-nights; `reserved` counter still shows 10/10 | ✅ (!) | ❌ mismatch on all 5 nights | — |
+| **Negative control**: naive read-then-write (no row locks) | same as row 2 | **356 holds accepted** for 50 room-nights; `reserved` counter never exceeds 10 | ✅ (!) | ❌ mismatch on all 5 nights | — |
 
 Exact counts vary from run to run (thread scheduling); the invariants must hold on every run, and the
 script exits non-zero if any fails or if the negative control is *not* detected.
@@ -30,7 +30,7 @@ script exits non-zero if any fails or if the negative control is *not* detected.
 ## What the negative control shows
 
 The naive implementation never violated `CHECK (reserved <= total)`: lost updates kept the counter at
-10 while 371 reservations were accepted. A database constraint on the counter alone is not enough. The
+10 while 356 reservations were accepted. A database constraint on the counter alone is not enough. The
 counter itself becomes wrong. Correctness comes from **serializing the read-check-write with row locks taken
 in a deterministic order**; the CHECK constraint is a backstop against code paths that skip locking, and
 the I2 audit (also exposed as `GET /api/v1/admin/inventory/audit`) is what detects drift.
