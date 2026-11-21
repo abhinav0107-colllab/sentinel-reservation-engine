@@ -40,18 +40,23 @@ Concurrency evidence: [`docs/CONCURRENCY_EVIDENCE.md`](docs/CONCURRENCY_EVIDENCE
 
 ## Status — what is verified and what is not
 
+Status as of 2026-11-21. "Executed" means the check was actually run and passed; anything else is
+labelled. Full numbers, environment and caveats: [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md).
+
 | Area | Status | Evidence |
 |---|---|---|
-| Schema (Flyway V1) | ✅ Executed | Applied to PostgreSQL 16.15 |
-| Reservation SQL under concurrency: no oversell, no drift, no deadlocks, idempotent retries, negative control detected | ✅ Executed | `tools/sql_concurrency_check.py` → [`reports/sql-concurrency.json`](reports/sql-concurrency.json), summarized in [`docs/CONCURRENCY_EVIDENCE.md`](docs/CONCURRENCY_EVIDENCE.md) |
-| Inventory upsert, drift audit query, CHECK on shrink, guarded payment status transitions | ✅ Executed | Run directly on PostgreSQL 16.15 |
-| Java syntax and references between project classes | ✅ Checked | `javac` without dependencies: no parse errors; only third-party symbols unresolved (library calls not type-checked) |
-| Docker Compose file | ✅ Validated | `docker compose config` (stack not started) |
-| Java application (API, idempotency, state machine, outbox relay, payment saga, sweeper, reconciler) | 🟡 Implemented, **not yet compiled** | Build environment had no access to Maven Central |
-| Java tests: 1 unit class, 3 integration classes (HTTP-level concurrency, idempotency, 7 saga/failure-injection scenarios) | 🟡 Written, **not yet executed** | Same reason; they run in CI (`mvn verify`) |
-| Reservation load generator (`tools/sentinel_loadtest.py`) | 🟡 Written, syntax-checked, not yet run against the service | |
+| Java application compiles | ✅ Executed | `mvn verify`, Java 21 / Spring Boot 3.5.7. No code changes were needed |
+| Java tests: 1 unit class, 3 integration classes (HTTP-level concurrency, idempotency, 7 saga/failure-injection scenarios) | ✅ Executed | 2 unit + 14 integration tests passed (two consecutive runs). External mode against local PostgreSQL 16, embedded KRaft Kafka. **Not** run via Testcontainers (no Docker) |
+| Reservation SQL under concurrency: no oversell, no drift, no deadlocks, idempotent retries, negative control detected | ✅ Executed (re-run) | [`reports/sql-concurrency-rerun-2026-11-21.json`](reports/sql-concurrency-rerun-2026-11-21.json); original: [`reports/sql-concurrency.json`](reports/sql-concurrency.json), [`docs/CONCURRENCY_EVIDENCE.md`](docs/CONCURRENCY_EVIDENCE.md) |
+| Schema (Flyway V1) | ✅ Executed | Applied by Flyway on app and test start |
+| Flash-sale load test (50 rooms, 32 clients, 30 s) | ✅ Executed | 1,473 req/s, p95 41.7 ms, 0 unexpected errors; exactly 50 confirmed; 0 oversold / drifted nights (checked in SQL independently of the app) |
+| Spread load test (200 room types, 32 clients, 60 s) | ✅ Executed | 1,730 req/s, p95 37.0 ms, 0 unexpected errors; 0 oversold / drifted nights |
+| Saga end state after load (confirm / decline / expiry / late-capture refund) | ✅ Executed | Every hold settled; 11 late captures refunded; provider ledger reconciles to the cent |
+| Payment step throughput | ⚠️ Finding | ~17 payments/s (one listener thread, 50 ms simulated provider) vs ~1,000 holds/s accepted. 83 % of spread-run holds expired before payment. Not fixed |
+| Docker Compose stack, Dockerfile | 🟡 Not run | No Docker on the verification machine (`docker compose config` was validated earlier) |
 | GitHub Actions CI | 🟡 Written, not yet run | Requires pushing to GitHub |
-| Performance results | ⬜ **None recorded** | No throughput/latency numbers are claimed |
+| Grafana dashboard | 🟡 Provisioned JSON, not viewed against live metrics | |
+| Provider outage / reconciler against the running service | ⬜ Not run | Covered only by `PaymentSagaIT` |
 
 ### Features
 
@@ -100,7 +105,7 @@ mvn verify                                              # unit + integration (Te
 python3 tools/sql_concurrency_check.py --dsn postgresql://postgres@localhost:5432/sentinel_check
 ```
 
-Without Docker: `SENTINEL_IT_EXTERNAL=true SENTINEL_IT_DB_URL=jdbc:postgresql://localhost:5432/sentinel_it SENTINEL_IT_DB_USER=postgres mvn verify`.
+Without Docker: `SENTINEL_IT_EXTERNAL=true SENTINEL_IT_DB_URL=jdbc:postgresql://localhost:5432/sentinel_it SENTINEL_IT_DB_USER=postgres SENTINEL_IT_DB_PASSWORD=... mvn verify` (Kafka is embedded).
 
 ## Benchmarks
 
@@ -110,7 +115,8 @@ python3 tools/sentinel_loadtest.py --scenario spread --room-types 200 --concurre
 ```
 
 Each report includes latency percentiles, status counts, unexpected-error rate and the post-run inventory
-audit result. **No results recorded yet.**
+audit result. For an audit that does not go through the application, run
+`psql -d sentinel -f tools/post_load_check.sql`. Results: **[`docs/BENCHMARKS.md`](docs/BENCHMARKS.md)**.
 
 ## Layout
 

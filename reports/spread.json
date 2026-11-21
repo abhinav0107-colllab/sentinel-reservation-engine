@@ -1,0 +1,40 @@
+{
+  "kind": "sentinel-load-test",
+  "timestamp": "2026-11-21T10:07:32.574693+00:00",
+  "environment": {
+    "cpu_count": 4,
+    "os": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "base_url": "http://localhost:8081"
+  },
+  "parameters": {
+    "base_url": "http://localhost:8081",
+    "api_key": "<redacted>",
+    "scenario": "spread",
+    "room_types": 200,
+    "rooms": 50,
+    "nights": 14,
+    "concurrency": 32,
+    "duration": 60,
+    "decline_ratio": 0.1,
+    "seed": 11,
+    "out": "reports/spread.json"
+  },
+  "results": {
+    "requests": 103887,
+    "elapsed_s": 60.04,
+    "throughput_rps": 1730.4,
+    "latency_ms": {
+      "p50": 16.39,
+      "p95": 37.03,
+      "p99": 50.43,
+      "max": 396.96,
+      "mean": 18.46
+    },
+    "status_counts": {
+      "201": 59692,
+      "409": 44195
+    },
+    "unexpected_error_rate": 0.0,
+    "inventory_audit_consistent": true
+  }
+}

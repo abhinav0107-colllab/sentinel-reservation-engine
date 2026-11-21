@@ -1,0 +1,40 @@
+{
+  "kind": "sentinel-load-test",
+  "timestamp": "2026-11-21T10:06:19.984712+00:00",
+  "environment": {
+    "cpu_count": 4,
+    "os": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "base_url": "http://localhost:8081"
+  },
+  "parameters": {
+    "base_url": "http://localhost:8081",
+    "api_key": "<redacted>",
+    "scenario": "flash-sale",
+    "room_types": 1,
+    "rooms": 50,
+    "nights": 14,
+    "concurrency": 32,
+    "duration": 30,
+    "decline_ratio": 0.1,
+    "seed": 11,
+    "out": "reports/flash.json"
+  },
+  "results": {
+    "requests": 44222,
+    "elapsed_s": 30.02,
+    "throughput_rps": 1473.2,
+    "latency_ms": {
+      "p50": 18.95,
+      "p95": 41.7,
+      "p99": 68.45,
+      "max": 694.78,
+      "mean": 21.68
+    },
+    "status_counts": {
+      "201": 56,
+      "409": 44166
+    },
+    "unexpected_error_rate": 0.0,
+    "inventory_audit_consistent": true
+  }
+}

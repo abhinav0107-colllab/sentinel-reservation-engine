@@ -1,5 +1,11 @@
 # Sentinel — Implementation Report
 
+> **Update 2026-11-21 (verification run):** the code has now been compiled and all tests executed
+> (`mvn verify`: 2 unit + 14 integration tests pass, external PostgreSQL 16, embedded KRaft Kafka). No
+> application code changes were needed. The service was load-tested (flash-sale and spread) with invariants
+> checked independently in SQL. A payment-throughput bottleneck was found. See [`BENCHMARKS.md`](BENCHMARKS.md).
+> The sections below are the original pre-compile report, kept for history.
+
 Snapshot date: 2026-11-21. This report states only what was executed and observed. Anything not executed
 is labelled as such.
 
