@@ -17,7 +17,7 @@ flowchart LR
     Sweeper -->|expire holds| PG
 ```
 
-Design document: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
+Implementation report: [`docs/IMPLEMENTATION_REPORT.md`](docs/IMPLEMENTATION_REPORT.md) · Design document: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 API: [`docs/API.md`](docs/API.md) ·
 Concurrency evidence: [`docs/CONCURRENCY_EVIDENCE.md`](docs/CONCURRENCY_EVIDENCE.md)
 
@@ -45,6 +45,7 @@ Concurrency evidence: [`docs/CONCURRENCY_EVIDENCE.md`](docs/CONCURRENCY_EVIDENCE
 | Schema (Flyway V1) | ✅ Executed | Applied to PostgreSQL 16.15 |
 | Reservation SQL under concurrency: no oversell, no drift, no deadlocks, idempotent retries, negative control detected | ✅ Executed | `tools/sql_concurrency_check.py` → [`reports/sql-concurrency.json`](reports/sql-concurrency.json), summarized in [`docs/CONCURRENCY_EVIDENCE.md`](docs/CONCURRENCY_EVIDENCE.md) |
 | Inventory upsert, drift audit query, CHECK on shrink, guarded payment status transitions | ✅ Executed | Run directly on PostgreSQL 16.15 |
+| Java syntax and references between project classes | ✅ Checked | `javac` without dependencies: no parse errors; only third-party symbols unresolved (library calls not type-checked) |
 | Docker Compose file | ✅ Validated | `docker compose config` (stack not started) |
 | Java application (API, idempotency, state machine, outbox relay, payment saga, sweeper, reconciler) | 🟡 Implemented, **not yet compiled** | Build environment had no access to Maven Central |
 | Java tests: 1 unit class, 3 integration classes (HTTP-level concurrency, idempotency, 7 saga/failure-injection scenarios) | 🟡 Written, **not yet executed** | Same reason; they run in CI (`mvn verify`) |
