@@ -76,11 +76,12 @@ CREATE TABLE idempotency_keys (
 );
 CREATE INDEX idx_idempotency_created ON idempotency_keys (created_at);
 
--- Payments as seen by Sentinel.
+-- Payments as seen by Sentinel. VOIDED = outcome was unknown, provider confirms no charge exists, and
+-- the reservation is already terminal (so no further charge attempt will be made).
 CREATE TABLE payments (
     id               UUID PRIMARY KEY,
     reservation_id   UUID          NOT NULL UNIQUE REFERENCES reservations (id),
-    status           VARCHAR(20)   NOT NULL CHECK (status IN ('PENDING', 'CAPTURED', 'DECLINED', 'REFUNDED', 'UNKNOWN')),
+    status           VARCHAR(20)   NOT NULL CHECK (status IN ('PENDING', 'CAPTURED', 'DECLINED', 'REFUNDED', 'UNKNOWN', 'VOIDED')),
     amount           NUMERIC(12,2) NOT NULL,
     currency         CHAR(3)       NOT NULL,
     provider_ref     VARCHAR(100),

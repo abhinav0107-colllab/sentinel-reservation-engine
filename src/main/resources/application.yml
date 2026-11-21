@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: sentinel-reservation-engine
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${SENTINEL_DB_URL:jdbc:postgresql://localhost:5432/sentinel}
+    username: ${SENTINEL_DB_USER:sentinel}
+    password: ${SENTINEL_DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: ${SENTINEL_DB_POOL:30}
+  kafka:
+    bootstrap-servers: ${SENTINEL_KAFKA_BOOTSTRAP:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+        max.block.ms: 5000
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    listener:
+      ack-mode: record
+  jackson:
+    default-property-inclusion: non_null
+
+sentinel:
+  reservation-topic: sentinel.reservation-events.v1
+  topic-partitions: 3
+  hold-ttl: 10m
+  outbox:
+    relay-enabled: true
+    batch-size: 200
+    send-timeout: 5s
+    retention: 7d
+  payment:
+    latency: ${SENTINEL_PAYMENT_LATENCY:50ms}
+    reconcile-after: 1m
+  admin:
+    api-key: ${SENTINEL_ADMIN_API_KEY:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        sentinel.reservation.hold: true
+
+server:
+  shutdown: graceful
+  error:
+    include-message: always
