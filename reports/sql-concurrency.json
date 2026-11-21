@@ -1,0 +1,143 @@
+{
+  "kind": "sql-concurrency-check",
+  "timestamp": "2026-11-21T08:56:12.441892+00:00",
+  "postgres_version": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+  "cpu_count": 2,
+  "contention": {
+    "threads": 32,
+    "attempts": 1600,
+    "rooms_per_night": 10,
+    "nights": [
+      {
+        "date": "2027-03-01",
+        "total": 10,
+        "reserved": 10
+      },
+      {
+        "date": "2027-03-02",
+        "total": 10,
+        "reserved": 9
+      },
+      {
+        "date": "2027-03-03",
+        "total": 10,
+        "reserved": 10
+      },
+      {
+        "date": "2027-03-04",
+        "total": 10,
+        "reserved": 10
+      },
+      {
+        "date": "2027-03-05",
+        "total": 10,
+        "reserved": 10
+      }
+    ],
+    "cancel_ratio": 0.2,
+    "elapsed_s": 0.99,
+    "outcomes": {
+      "held": 148,
+      "sold_out": 1142,
+      "released": 109,
+      "release_noop": 201
+    },
+    "oversold_nights": [],
+    "accounting_mismatches": []
+  },
+  "no_cancellation": {
+    "threads": 32,
+    "attempts": 1600,
+    "rooms_per_night": 10,
+    "nights": [
+      {
+        "date": "2027-03-01",
+        "total": 10,
+        "reserved": 10
+      },
+      {
+        "date": "2027-03-02",
+        "total": 10,
+        "reserved": 10
+      },
+      {
+        "date": "2027-03-03",
+        "total": 10,
+        "reserved": 10
+      },
+      {
+        "date": "2027-03-04",
+        "total": 10,
+        "reserved": 10
+      },
+      {
+        "date": "2027-03-05",
+        "total": 10,
+        "reserved": 10
+      }
+    ],
+    "cancel_ratio": 0.0,
+    "elapsed_s": 0.8,
+    "outcomes": {
+      "held": 29,
+      "sold_out": 1571
+    },
+    "oversold_nights": [],
+    "accounting_mismatches": []
+  },
+  "idempotency": {
+    "concurrent_requests_same_key": 25,
+    "reservations_created": 1,
+    "distinct_ids_returned": 1,
+    "replayed": 24,
+    "max_reserved": 1
+  },
+  "negative_control_naive": {
+    "threads": 32,
+    "attempts": 1600,
+    "rooms_per_night": 10,
+    "nights": [
+      {
+        "date": "2027-03-01",
+        "total": 10,
+        "reserved": 10
+      },
+      {
+        "date": "2027-03-02",
+        "total": 10,
+        "reserved": 10
+      },
+      {
+        "date": "2027-03-03",
+        "total": 10,
+        "reserved": 10
+      },
+      {
+        "date": "2027-03-04",
+        "total": 10,
+        "reserved": 10
+      },
+      {
+        "date": "2027-03-05",
+        "total": 10,
+        "reserved": 10
+      }
+    ],
+    "cancel_ratio": 0.0,
+    "elapsed_s": 1.02,
+    "outcomes": {
+      "held": 371,
+      "sold_out": 1229
+    },
+    "oversold_nights": [],
+    "accounting_mismatches": [
+      "2027-03-01",
+      "2027-03-02",
+      "2027-03-03",
+      "2027-03-04",
+      "2027-03-05"
+    ]
+  },
+  "negative_control_detected_violation": true,
+  "invariants_hold": true
+}
