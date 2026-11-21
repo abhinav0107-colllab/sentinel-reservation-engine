@@ -36,7 +36,7 @@ import java.util.UUID;
         "sentinel.reconciler.interval=1h",
         "spring.datasource.hikari.maximum-pool-size=40",
 })
-@EmbeddedKafka(partitions = 3, bootstrapServersProperty = "spring.kafka.bootstrap-servers")
+@EmbeddedKafka(kraft = true, partitions = 3, bootstrapServersProperty = "spring.kafka.bootstrap-servers")
 public abstract class IntegrationTestBase {
 
     public static final String API_KEY = "test-admin-key";
